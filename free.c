@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./includes/so_long.h"
+#include "./includes/cub3d.h"
 
 void	free_gnl(int fd, char *line, char *last_line)
 {
@@ -26,46 +26,52 @@ void	free_gnl(int fd, char *line, char *last_line)
 	}
 }
 
-static void	free_mlx(t_map *map)
+static void	free_mlx(t_cub *cub)
 {
-	if (map->imgs)
+	int	i;
+
+	i = 0;
+	while (i < 4)
 	{
-		while (map->imgs_count && --map->imgs_count >= 0)
-			mlx_destroy_image(map->mlx, map->imgs[map->imgs_count]);
-		free(map->imgs);
+		if (cub->tex[i].ptr)
+			mlx_destroy_image(cub->mlx, cub->tex[i].ptr);
+		i++;
 	}
-	if (map->mlx_wdw)
-		mlx_destroy_window(map->mlx, map->mlx_wdw);
-	if (map->mlx)
+	if (cub->frame.ptr)
+		mlx_destroy_image(cub->mlx, cub->frame.ptr);
+	if (cub->win)
+		mlx_destroy_window(cub->mlx, cub->win);
+	if (cub->mlx)
 	{
-		mlx_destroy_display(map->mlx);
-		free(map->mlx);
+		mlx_destroy_display(cub->mlx);
+		free(cub->mlx);
 	}
 }
 
-void	free_map(t_map *map)
+void	free_cub(t_cub *cub)
 {
-	size_t	i;
+	int	i;
 
-	if (map == NULL)
+	if (!cub)
 		return ;
-	if (map->content)
-		free(map->content);
-	if (map->lines)
+	i = 0;
+	while (i < 4)
+	{
+		if (cub->tex_paths[i])
+			free(cub->tex_paths[i]);
+		i++;
+	}
+	if (cub->map)
 	{
 		i = 0;
-		while (i < map->line_count)
+		while (i < cub->map_h)
 		{
-			if (map->lines[i])
-				free(map->lines[i]);
-			if (map->copy_lines && map->copy_lines[i])
-				free(map->copy_lines[i]);
+			if (cub->map[i])
+				free(cub->map[i]);
 			i++;
 		}
-		free(map->lines);
-		if (map->copy_lines)
-			free(map->copy_lines);
+		free(cub->map);
 	}
-	free_mlx(map);
-	free(map);
+	free_mlx(cub);
+	free(cub);
 }
