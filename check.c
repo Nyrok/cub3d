@@ -6,111 +6,155 @@
 /*   By: hkonte <hkonte@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 13:16:35 by hkonte            #+#    #+#             */
-/*   Updated: 2025/04/26 18:01:04 by hkonte           ###   ########.fr       */
+/*   Updated: 2025/04/17 13:16:35 by hkonte           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./includes/so_long.h"
+#include "./includes/cub3d.h"
 
-static void	check_chrs(t_map *map, char *line, char *last_line, size_t line_len)
+static void	check_chars(t_cub *cub)
 {
-	size_t	i;
+	int		y;
+	int		x;
+	char	c;
 
-	i = 0;
-	while (i < line_len - 1)
+	y = 0;
+	while (y < cub->map_h)
 	{
-		if (line[i] != WALL && line[i] != EMPTY && line[i] != EXIT \
-			&& line[i] != ITEM && line[i] != PLAYER)
+		x = 0;
+		while (cub->map[y][x])
 		{
-			free_gnl(map->fd, line, last_line);
-			exit_error(map, "(Map) Invalid map chars.");
+			c = cub->map[y][x];
+			if (c != '0' && c != '1' && c != 'N' && c != 'S'
+				&& c != 'E' && c != 'W' && c != ' ')
+				exit_error(cub, "Invalid character in map.");
+			x++;
 		}
-		i++;
+		y++;
 	}
 }
 
-static void	check_wall(t_map *map, char *str)
+static void	set_player_dir(t_cub *cub, char c)
 {
-	int	i;
-
-	i = 0;
-	while (str[i] != '\n')
+	if (c == 'N')
 	{
-		if (str[i] != WALL)
-		{
-			free_gnl(map->fd, str, NULL);
-			exit_error(map, "(Map) First/last line is not a wall.");
-		}
-		i++;
+		cub->player.dir_x = 0;
+		cub->player.dir_y = -1;
+		cub->player.plane_x = 0.66;
+		cub->player.plane_y = 0;
 	}
-}
-
-static void	check_line(t_map *map, char *line, char *last_line, size_t line_len)
-{
-	if (!line)
-		check_wall(map, last_line);
-	else if (line[0] == '\n')
+	else if (c == 'S')
 	{
-		free_gnl(map->fd, line, last_line);
-		exit_error(map, "(Map) Empty lines.");
+		cub->player.dir_x = 0;
+		cub->player.dir_y = 1;
+		cub->player.plane_x = -0.66;
+		cub->player.plane_y = 0;
 	}
-	else if (ft_strlen(line) != line_len)
+	else if (c == 'E')
 	{
-		free_gnl(map->fd, line, last_line);
-		exit_error(map, "(Map) Line length mismatch.");
-	}
-	else if (line[0] != WALL || line[line_len - 2] != WALL)
-	{
-		free_gnl(map->fd, line, last_line);
-		exit_error(map, "(Map) Line is not surrounded by walls.");
+		cub->player.dir_x = 1;
+		cub->player.dir_y = 0;
+		cub->player.plane_x = 0;
+		cub->player.plane_y = 0.66;
 	}
 	else
-		check_chrs(map, line, last_line, line_len);
-}
-
-void	check_map(char *path, t_map *map)
-{
-	int		fd;
-	char	*last_line;
-	char	*line;
-	size_t	line_count;
-	size_t	line_len;
-
-	fd = safe_open(map, path);
-	line = get_next_line(fd);
-	if (!line)
-		exit_error(map, "(Map) Empty map.");
-	map->fd = fd;
-	map->content = ft_strjoin(map->content, line);
-	line_count = 0;
-	line_len = ft_strlen(line);
-	check_wall(map, line);
-	while (line != NULL && ++line_count)
 	{
-		last_line = line;
-		line = get_next_line(fd);
-		check_line(map, line, last_line, line_len);
-		map->content = ft_strjoin(map->content, line);
-		free(last_line);
+		cub->player.dir_x = -1;
+		cub->player.dir_y = 0;
+		cub->player.plane_x = 0;
+		cub->player.plane_y = -0.66;
 	}
-	map->line_count = line_count;
-	map->line_len = line_len;
 }
 
-void	check_content(t_map *map)
+static void	check_player(t_cub *cub)
 {
-	size_t	items_count;
+	int		count;
+	int		y;
+	int		x;
+	char	c;
 
-	if (!map->content)
-		exit_error(map, "Malloc failed for map content.");
-	items_count = ft_strcount(map->content, ITEM);
-	map->remaining_items = items_count;
-	if (items_count == 0)
-		exit_error(map, "(Map) The map must have at least one item.");
-	if (ft_strcount(map->content, PLAYER) != 1)
-		exit_error(map, "(Map) The map must have one player spawn.");
-	if (ft_strcount(map->content, EXIT) != 1)
-		exit_error(map, "(Map) The map must have one exit.");
-	if (map->line_count >= map->line_len - 1)
-		exit_error(map, "(Map) The map must be rectangular.");
+	count = 0;
+	y = 0;
+	while (y < cub->map_h)
+	{
+		x = 0;
+		while (cub->map[y][x])
+		{
+			c = cub->map[y][x];
+			if (c == 'N' || c == 'S' || c == 'E' || c == 'W')
+			{
+				count++;
+				cub->player.pos_x = x + 0.5;
+				cub->player.pos_y = y + 0.5;
+				set_player_dir(cub, c);
+			}
+			x++;
+		}
+		y++;
+	}
+	if (count != 1)
+		exit_error(cub, "Map must have exactly one player spawn.");
+}
+
+static int	is_open(t_cub *cub, int y, int x)
+{
+	if (y < 0 || y >= cub->map_h)
+		return (1);
+	if (x < 0 || x >= (int)ft_strlen(cub->map[y]))
+		return (1);
+	if (cub->map[y][x] == ' ')
+		return (1);
+	return (0);
+}
+
+static void	check_closed(t_cub *cub)
+{
+	int		y;
+	int		x;
+	char	c;
+
+	y = 0;
+	while (y < cub->map_h)
+	{
+		x = 0;
+		while (cub->map[y][x])
+		{
+			c = cub->map[y][x];
+			if (c == '0' || c == 'N' || c == 'S'
+				|| c == 'E' || c == 'W')
+			{
+				if (is_open(cub, y - 1, x) || is_open(cub, y + 1, x)
+					|| is_open(cub, y, x - 1) || is_open(cub, y, x + 1))
+					exit_error(cub, "Map is not closed/surrounded by walls.");
+			}
+			x++;
+		}
+		y++;
+	}
+}
+
+void	validate_cub(t_cub *cub)
+{
+	int	i;
+	int	fd;
+
+	if (!cub->tex_paths[0] || !cub->tex_paths[1]
+		|| !cub->tex_paths[2] || !cub->tex_paths[3])
+		exit_error(cub, "Missing texture path(s) in .cub file.");
+	if (cub->floor_color < 0 || cub->ceil_color < 0)
+		exit_error(cub, "Missing floor or ceiling color in .cub file.");
+	i = 0;
+	while (i < 4)
+	{
+		fd = open(cub->tex_paths[i], O_RDONLY);
+		if (fd == -1)
+			exit_error(cub, "Texture file not found.");
+		close(fd);
+		i++;
+	}
+	if (!cub->map || cub->map_h == 0)
+		exit_error(cub, "Map is empty.");
+	check_chars(cub);
+	check_player(cub);
+	check_closed(cub);
 }
