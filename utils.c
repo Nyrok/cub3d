@@ -10,22 +10,22 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./includes/so_long.h"
+#include "./includes/cub3d.h"
 
-int	safe_open(t_map *map, char *path)
+int	safe_open(t_cub *cub, char *path)
 {
 	int	fd;
 
 	fd = open(path, O_RDONLY);
 	if (fd == -1)
-		exit_error(map, "Can't open the file.");
+		exit_error(cub, "Can't open the file.");
 	return (fd);
 }
 
-void	safe_close(t_map *map, int fd)
+void	safe_close(t_cub *cub, int fd)
 {
 	if (close(fd) == -1)
-		exit_error(map, "Can't close the file.");
+		exit_error(cub, "Can't close the file.");
 }
 
 int	ft_strcount(char *str, char c)
