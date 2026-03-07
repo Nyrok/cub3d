@@ -10,122 +10,95 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./includes/so_long.h"
+#include "./includes/cub3d.h"
 
-static void	game_insert(t_map *map, char c, char *texture)
+static void	load_textures(t_cub *cub)
 {
-	void		*img;
-	int			img_width;
-	int			img_height;
-	size_t		i;
-	size_t		j;
+	int	i;
 
-	img = mlx_xpm_file_to_image(map->mlx, texture, \
-		&img_width, &img_height);
-	if (!img)
-		exit_error(map, "Can't turn xpm to image.");
 	i = 0;
-	while (i < map->line_count)
+	while (i < 4)
 	{
-		j = 0;
-		while (j < map->line_len)
-		{
-			if (map->lines[i][j] == c)
-				mlx_put_image_to_window(map->mlx, map->mlx_wdw, \
-					img, j * SIZE, i * SIZE);
-			j++;
-		}
+		cub->tex[i].ptr = mlx_xpm_file_to_image(cub->mlx,
+				cub->tex_paths[i], &cub->tex[i].width, &cub->tex[i].height);
+		if (!cub->tex[i].ptr)
+			exit_error(cub, "Failed to load texture.");
+		cub->tex[i].data = mlx_get_data_addr(cub->tex[i].ptr,
+				&cub->tex[i].bpp, &cub->tex[i].line_len, &cub->tex[i].endian);
 		i++;
 	}
-	map->imgs[map->imgs_count++] = img;
 }
 
-static void	player_move(t_map *map, int x, int y)
+int	key_press(int keycode, t_cub *cub)
 {
-	if (map->lines[map->player_y + y][map->player_x + x] == WALL)
-		return ;
-	else if (map->lines[map->player_y + y][map->player_x + x] == EXIT)
-	{
-		if (map->remaining_items)
-			return ;
-		else
-			exit_game(map);
-	}
-	else if (map->lines[map->player_y + y][map->player_x + x] == ITEM)
-		map->remaining_items--;
-	map->lines[map->player_y][map->player_x] = EMPTY;
-	map->lines[map->player_y + y][map->player_x + x] = PLAYER;
-	map->player_y += y;
-	map->player_x += x;
-	ft_printf("Moves count: %i\n", ++map->moves_count);
-}
-
-static void	render_map(t_map *map)
-{
-	size_t	i;
-	size_t	j;
-	int		img_index;
-
-	i = -1;
-	while (++i < map->line_count)
-	{
-		j = 0;
-		while (j < map->line_len)
-		{
-			if (map->lines[i][j] == EMPTY)
-				img_index = 0;
-			else if (map->lines[i][j] == WALL)
-				img_index = 1;
-			else if (map->lines[i][j] == ITEM)
-				img_index = 2;
-			else if (map->lines[i][j] == PLAYER)
-				img_index = 3;
-			else if (map->lines[i][j] == EXIT)
-				img_index = 4;
-			mlx_put_image_to_window(map->mlx, map->mlx_wdw, \
-				map->imgs[img_index], j * SIZE, i * SIZE);
-			j++;
-		}
-	}
-}
-
-int	key_hook(int keycode, t_map *map)
-{
-	if (keycode == 119)
-		player_move(map, 0, -1);
+	if (keycode == 119 || keycode == 65362)
+		cub->keys.w = 1;
+	else if (keycode == 115 || keycode == 65364)
+		cub->keys.s = 1;
 	else if (keycode == 97)
-		player_move(map, -1, 0);
-	else if (keycode == 115)
-		player_move(map, 0, 1);
+		cub->keys.a = 1;
 	else if (keycode == 100)
-		player_move(map, 1, 0);
+		cub->keys.d = 1;
+	else if (keycode == 65361)
+		cub->keys.left = 1;
+	else if (keycode == 65363)
+		cub->keys.right = 1;
 	else if (keycode == 65307)
-		exit_game(map);
-	mlx_clear_window(map->mlx, map->mlx_wdw);
-	render_map(map);
+		exit_game(cub);
 	return (0);
 }
 
-void	init_window(t_map *map)
+int	key_release(int keycode, t_cub *cub)
 {
-	map->mlx = mlx_init();
-	if (!map->mlx)
-		exit_error(map, "Cannot initialize mlx.");
-	map->mlx_wdw = mlx_new_window(map->mlx, \
-		map->size_x, map->size_y, "not_so_long");
-	if (!map->mlx_wdw)
-		exit_error(map, "Cannot create window.");
-	map->imgs = malloc(5 * sizeof(void *));
-	if (!map->imgs)
-		exit_error(map, "Malloc failed for imgs");
-	map->moves_count = 0;
-	map->imgs_count = 0;
-	game_insert(map, EMPTY, BACKGROUND_TEXTURE);
-	game_insert(map, WALL, WALL_TEXTURE);
-	game_insert(map, ITEM, ITEM_TEXTURE);
-	game_insert(map, PLAYER, PLAYER_TEXTURE);
-	game_insert(map, EXIT, EXIT_TEXTURE);
-	mlx_hook(map->mlx_wdw, 3, 1L << 1, key_hook, map);
-	mlx_hook(map->mlx_wdw, 17, 0, exit_game, map);
-	mlx_loop(map->mlx);
+	if (keycode == 119 || keycode == 65362)
+		cub->keys.w = 0;
+	else if (keycode == 115 || keycode == 65364)
+		cub->keys.s = 0;
+	else if (keycode == 97)
+		cub->keys.a = 0;
+	else if (keycode == 100)
+		cub->keys.d = 0;
+	else if (keycode == 65361)
+		cub->keys.left = 0;
+	else if (keycode == 65363)
+		cub->keys.right = 0;
+	return (0);
+}
+
+int	game_loop(t_cub *cub)
+{
+	if (cub->keys.w)
+		move_forward(cub);
+	if (cub->keys.s)
+		move_backward(cub);
+	if (cub->keys.a)
+		strafe_left(cub);
+	if (cub->keys.d)
+		strafe_right(cub);
+	if (cub->keys.left)
+		rotate_player(cub, -ROT_SPEED);
+	if (cub->keys.right)
+		rotate_player(cub, ROT_SPEED);
+	render_frame(cub);
+	mlx_put_image_to_window(cub->mlx, cub->win, cub->frame.ptr, 0, 0);
+	return (0);
+}
+
+void	init_window(t_cub *cub)
+{
+	cub->mlx = mlx_init();
+	if (!cub->mlx)
+		exit_error(cub, "Cannot initialize mlx.");
+	cub->win = mlx_new_window(cub->mlx, WIN_W, WIN_H, "cub3D");
+	if (!cub->win)
+		exit_error(cub, "Cannot create window.");
+	cub->frame.ptr = mlx_new_image(cub->mlx, WIN_W, WIN_H);
+	cub->frame.data = mlx_get_data_addr(cub->frame.ptr,
+			&cub->frame.bpp, &cub->frame.line_len, &cub->frame.endian);
+	load_textures(cub);
+	mlx_hook(cub->win, 2, 1L << 0, key_press, cub);
+	mlx_hook(cub->win, 3, 1L << 1, key_release, cub);
+	mlx_hook(cub->win, 17, 0, exit_game, cub);
+	mlx_loop_hook(cub->mlx, game_loop, cub);
+	mlx_loop(cub->mlx);
 }
