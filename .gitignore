@@ -5,3 +5,5 @@
 so_long
 *.sh
 *.log
+.worktrees/
+cub3D
