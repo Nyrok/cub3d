@@ -1,7 +1,7 @@
 CX = cc
 CXFLAGS = -Wall -Wextra -Werror -g3
 
-MINILIBXFLAGS = -lX11 -lXext -lm
+MINILIBXFLAGS = -L/opt/X11/lib -lX11 -lXext -lm
 
 SRCS =	main.c \
 		map.c \
@@ -11,11 +11,13 @@ SRCS =	main.c \
 		free.c \
 		check.c \
 		game.c \
+		render.c \
+		player.c \
 		get_next_line/get_next_line_bonus.c \
 		get_next_line/get_next_line_utils_bonus.c
 
 OBJS = $(SRCS:.c=.o)
-OUTPUT = so_long
+OUTPUT = cub3D
 
 LIB_PRINTF = ft_printf/libftprintf.a
 LIB_MINILIBX = minilibx-linux/libmlx.a
