@@ -19,9 +19,9 @@ void	move_forward(t_cub *cub)
 
 	nx = cub->player.pos_x + cub->player.dir_x * MOVE_SPEED;
 	ny = cub->player.pos_y + cub->player.dir_y * MOVE_SPEED;
-	if (cub->map[(int)cub->player.pos_y][(int)nx] != '1')
+	if (!is_wall(cub, (int)nx, (int)cub->player.pos_y))
 		cub->player.pos_x = nx;
-	if (cub->map[(int)ny][(int)cub->player.pos_x] != '1')
+	if (!is_wall(cub, (int)cub->player.pos_x, (int)ny))
 		cub->player.pos_y = ny;
 }
 
@@ -32,9 +32,9 @@ void	move_backward(t_cub *cub)
 
 	nx = cub->player.pos_x - cub->player.dir_x * MOVE_SPEED;
 	ny = cub->player.pos_y - cub->player.dir_y * MOVE_SPEED;
-	if (cub->map[(int)cub->player.pos_y][(int)nx] != '1')
+	if (!is_wall(cub, (int)nx, (int)cub->player.pos_y))
 		cub->player.pos_x = nx;
-	if (cub->map[(int)ny][(int)cub->player.pos_x] != '1')
+	if (!is_wall(cub, (int)cub->player.pos_x, (int)ny))
 		cub->player.pos_y = ny;
 }
 
@@ -45,9 +45,9 @@ void	strafe_left(t_cub *cub)
 
 	nx = cub->player.pos_x - cub->player.plane_x * MOVE_SPEED;
 	ny = cub->player.pos_y - cub->player.plane_y * MOVE_SPEED;
-	if (cub->map[(int)cub->player.pos_y][(int)nx] != '1')
+	if (!is_wall(cub, (int)nx, (int)cub->player.pos_y))
 		cub->player.pos_x = nx;
-	if (cub->map[(int)ny][(int)cub->player.pos_x] != '1')
+	if (!is_wall(cub, (int)cub->player.pos_x, (int)ny))
 		cub->player.pos_y = ny;
 }
 
@@ -58,9 +58,9 @@ void	strafe_right(t_cub *cub)
 
 	nx = cub->player.pos_x + cub->player.plane_x * MOVE_SPEED;
 	ny = cub->player.pos_y + cub->player.plane_y * MOVE_SPEED;
-	if (cub->map[(int)cub->player.pos_y][(int)nx] != '1')
+	if (!is_wall(cub, (int)nx, (int)cub->player.pos_y))
 		cub->player.pos_x = nx;
-	if (cub->map[(int)ny][(int)cub->player.pos_x] != '1')
+	if (!is_wall(cub, (int)cub->player.pos_x, (int)ny))
 		cub->player.pos_y = ny;
 }
 

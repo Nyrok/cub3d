@@ -34,36 +34,24 @@ static void	check_chars(t_cub *cub)
 	}
 }
 
-static void	set_player_dir(t_cub *cub, char c)
+static int	init_player(t_cub *cub, int x, int y, char c)
 {
-	if (c == 'N')
-	{
-		cub->player.dir_x = 0;
-		cub->player.dir_y = -1;
-		cub->player.plane_x = 0.66;
-		cub->player.plane_y = 0;
-	}
-	else if (c == 'S')
-	{
-		cub->player.dir_x = 0;
-		cub->player.dir_y = 1;
-		cub->player.plane_x = -0.66;
-		cub->player.plane_y = 0;
-	}
-	else if (c == 'E')
-	{
-		cub->player.dir_x = 1;
-		cub->player.dir_y = 0;
-		cub->player.plane_x = 0;
-		cub->player.plane_y = 0.66;
-	}
-	else
-	{
-		cub->player.dir_x = -1;
-		cub->player.dir_y = 0;
-		cub->player.plane_x = 0;
-		cub->player.plane_y = -0.66;
-	}
+	static const double	d[4][4] = {
+	{0, -1, 0.66, 0},
+	{0, 1, -0.66, 0},
+	{1, 0, 0, 0.66},
+	{-1, 0, 0, -0.66}
+	};
+	int					i;
+
+	i = (c == 'S') + 2 * (c == 'E') + 3 * (c == 'W');
+	cub->player.pos_x = x + 0.5;
+	cub->player.pos_y = y + 0.5;
+	cub->player.dir_x = d[i][0];
+	cub->player.dir_y = d[i][1];
+	cub->player.plane_x = d[i][2];
+	cub->player.plane_y = d[i][3];
+	return (1);
 }
 
 static void	check_player(t_cub *cub)
@@ -82,29 +70,13 @@ static void	check_player(t_cub *cub)
 		{
 			c = cub->map[y][x];
 			if (c == 'N' || c == 'S' || c == 'E' || c == 'W')
-			{
-				count++;
-				cub->player.pos_x = x + 0.5;
-				cub->player.pos_y = y + 0.5;
-				set_player_dir(cub, c);
-			}
+				count += init_player(cub, x, y, c);
 			x++;
 		}
 		y++;
 	}
 	if (count != 1)
 		exit_error(cub, "Map must have exactly one player spawn.");
-}
-
-static int	is_open(t_cub *cub, int y, int x)
-{
-	if (y < 0 || y >= cub->map_h)
-		return (1);
-	if (x < 0 || x >= (int)ft_strlen(cub->map[y]))
-		return (1);
-	if (cub->map[y][x] == ' ')
-		return (1);
-	return (0);
 }
 
 static void	check_closed(t_cub *cub)
