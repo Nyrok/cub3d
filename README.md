@@ -1,5 +1,4 @@
 
-
 ````markdown
 *This project has been created as part of the 42 curriculum by hkonte, ikhelil.*
 
@@ -30,7 +29,7 @@ The rendering is done using the MiniLibX graphical library.
 
 ---
 
-## How it works (simple)
+## How it works
 
 For each frame:
 - The program sends rays from the player
@@ -149,19 +148,6 @@ and a clear message explaining the issue.
 * MiniLibX (42 documentation)
 * `man open`, `read`, `malloc`, `free`, `math`
 
----
-
-## AI usage
-
-AI was used to:
-
-* better understand the subject
-* clarify raycasting concepts
-* think about edge cases (parsing and errors)
-
-All suggestions were reviewed, understood, and tested.
-
----
 
 ## Tests
 
