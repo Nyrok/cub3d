@@ -12,6 +12,8 @@
 
 #include "../includes/get_next_line_bonus.h"
 
+static char	*g_memory[MAX_FD];
+
 static char	*parse_buffer_line(char *buffer)
 {
 	size_t	i;
@@ -93,15 +95,30 @@ static char	*update_memory(int fd, char *memory)
 
 char	*get_next_line(int fd)
 {
-	static char	*memory[MAX_FD];
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	memory[fd] = update_memory(fd, memory[fd]);
-	if (!memory[fd])
+	g_memory[fd] = update_memory(fd, g_memory[fd]);
+	if (!g_memory[fd])
 		return (NULL);
-	line = parse_buffer_line(memory[fd]);
-	memory[fd] = parse_buffer_memory(memory[fd]);
+	line = parse_buffer_line(g_memory[fd]);
+	g_memory[fd] = parse_buffer_memory(g_memory[fd]);
 	return (line);
+}
+
+void	gnl_clear_all(void)
+{
+	int	i;
+
+	i = 0;
+	while (i < MAX_FD)
+	{
+		if (g_memory[i])
+		{
+			free(g_memory[i]);
+			g_memory[i] = NULL;
+		}
+		i++;
+	}
 }

@@ -7,6 +7,7 @@ SRCS =	main.c \
 		map.c \
 		exit.c \
 		backtrack.c \
+		color.c \
 		utils.c \
 		free.c \
 		check.c \

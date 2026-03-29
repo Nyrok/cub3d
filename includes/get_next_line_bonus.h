@@ -20,6 +20,7 @@
 # include <unistd.h>
 
 char	*get_next_line(int fd);
+void	gnl_clear_all(void);
 char	*ft_strchr(const char *str, const char c);
 size_t	ft_strlen(const char *str);
 char	*ft_strjoin(char *s1, char *s2);

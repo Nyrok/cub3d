@@ -14,6 +14,7 @@
 
 void	exit_error(t_cub *cub, char *message)
 {
+	gnl_clear_all();
 	free_cub(cub);
 	ft_putendl_fd("Error", STDERR_FILENO);
 	ft_putendl_fd(message, STDERR_FILENO);

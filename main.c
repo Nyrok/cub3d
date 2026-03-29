@@ -21,7 +21,9 @@ int	main(int argc, char **argv)
 		ft_putendl_fd("Usage: ./cub3D <scene.cub>", STDOUT_FILENO);
 		return (EXIT_FAILURE);
 	}
-	cub = malloc(sizeof(t_cub));
+	cub = ft_calloc(1, sizeof(t_cub));
+	if (!cub)
+		exit_error(NULL, "Malloc for cub failed.");
 	init_cub(argv[1], cub);
 	init_window(cub);
 	return (0);

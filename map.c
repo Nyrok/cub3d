@@ -12,8 +12,10 @@
 
 #include "./includes/cub3d.h"
 
-static void	parse_element(t_cub *cub, char *line)
+static char	*parse_element(t_cub *cub, char *line)
 {
+	int	color;
+
 	if (!ft_strncmp(line, "NO ", 3))
 		cub->tex_paths[TEX_NO] = ft_strtrim(line + 3, " \t\n");
 	else if (!ft_strncmp(line, "SO ", 3))
@@ -22,12 +24,21 @@ static void	parse_element(t_cub *cub, char *line)
 		cub->tex_paths[TEX_WE] = ft_strtrim(line + 3, " \t\n");
 	else if (!ft_strncmp(line, "EA ", 3))
 		cub->tex_paths[TEX_EA] = ft_strtrim(line + 3, " \t\n");
-	else if (!ft_strncmp(line, "F ", 2))
-		cub->floor_color = parse_color(cub, line + 2);
-	else if (!ft_strncmp(line, "C ", 2))
-		cub->ceil_color = parse_color(cub, line + 2);
+	else if (!ft_strncmp(line, "F ", 2) || !ft_strncmp(line, "C ", 2))
+	{
+		color = parse_color(cub, line + 2);
+		if (color == -2)
+			return ("Invalid color format.");
+		if (color == -1)
+			return ("Color values must be 0-255.");
+		if (line[0] == 'F')
+			cub->floor_color = color;
+		else
+			cub->ceil_color = color;
+	}
 	else
-		exit_error(cub, "Unknown element in .cub file.");
+		return ("Unknown element in .cub file.");
+	return (NULL);
 }
 
 static int	all_elements_set(t_cub *cub)
@@ -65,7 +76,7 @@ static void	parse_map_line(t_cub *cub, char *line, int fd)
 static void	parse_file(t_cub *cub, int fd)
 {
 	char	*line;
-	char	*trimmed;
+	char	*error;
 
 	line = get_next_line(fd);
 	while (line)
@@ -77,14 +88,11 @@ static void	parse_file(t_cub *cub, int fd)
 			continue ;
 		}
 		if (all_elements_set(cub))
-		{
-			trimmed = ft_strtrim(line, "\n");
-			free(line);
-			parse_map_line(cub, trimmed, fd);
-			return ;
-		}
-		parse_element(cub, line);
+			return (parse_map_line(cub, ft_strtrim(line, "\n"), fd), free(line));
+		error = parse_element(cub, line);
 		free(line);
+		if (error)
+			exit_error(cub, error);
 		line = get_next_line(fd);
 	}
 }
@@ -97,14 +105,14 @@ void	init_cub(char *path, t_cub *cub)
 
 	if (!cub)
 		exit_error(NULL, "Malloc for cub failed.");
+	ft_memset(cub, 0, sizeof(t_cub));
+	cub->floor_color = -1;
+	cub->ceil_color = -1;
 	ext_len = ft_strlen(MAP_FILE_EXT);
 	path_len = ft_strlen(path);
 	if (path_len < ext_len
 		|| ft_strncmp(path + path_len - ext_len, MAP_FILE_EXT, ext_len))
 		exit_error(cub, "Map file must end with .cub");
-	ft_memset(cub, 0, sizeof(t_cub));
-	cub->floor_color = -1;
-	cub->ceil_color = -1;
 	fd = safe_open(cub, path);
 	parse_file(cub, fd);
 	safe_close(cub, fd);
