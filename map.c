@@ -58,12 +58,14 @@ static void	parse_map_line(t_cub *cub, char *line, int fd)
 	{
 		trimmed = ft_strtrim(line, "\n");
 		free(line);
+		if (!trimmed)
+			exit_error(cub, "Malloc failed for map.");
 		len = ft_strlen(trimmed);
 		if (len > cub->map_w)
 			cub->map_w = len;
 		new_map = ft_calloc(cub->map_h + 2, sizeof(char *));
 		if (!new_map)
-			exit_error(cub, "Malloc failed for map.");
+			return (free(trimmed), exit_error(cub, "Malloc failed for map."));
 		ft_memcpy(new_map, cub->map, cub->map_h * sizeof(char *));
 		new_map[cub->map_h] = trimmed;
 		free(cub->map);

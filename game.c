@@ -93,6 +93,8 @@ void	init_window(t_cub *cub)
 	if (!cub->win)
 		exit_error(cub, "Cannot create window.");
 	cub->frame.ptr = mlx_new_image(cub->mlx, WIN_W, WIN_H);
+	if (!cub->frame.ptr)
+		exit_error(cub, "Failed to create frame image.");
 	cub->frame.data = mlx_get_data_addr(cub->frame.ptr,
 			&cub->frame.bpp, &cub->frame.line_len, &cub->frame.endian);
 	load_textures(cub);
