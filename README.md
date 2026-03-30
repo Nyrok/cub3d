@@ -1,5 +1,3 @@
-
-````markdown
 *This project has been created as part of the 42 curriculum by hkonte, ikhelil.*
 
 # cub3D
@@ -55,7 +53,7 @@ This creates a 3D effect from a 2D map.
 ```bash
 make
 ./cub3D maps/good.cub
-````
+```
 
 ### Requirements
 
